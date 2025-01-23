@@ -1,0 +1,23 @@
+name: CTMS Upload Action
+description: Upload MTA to Cloud Transport Managment
+inputs:
+  mta:
+    description: 'Path to the MTA file'
+    required: true
+  credentials:
+    description: 'Service key (JSON) for the Cloud Transport Management service'
+    required: true
+  namedUser:
+    description: 'Named user for the Cloud Transport Management service'
+    required: false
+  nodeName:
+    description: 'Node name for the Cloud Transport Management service'
+    required: true
+  transportDescription:
+    description: 'Description for the transport'
+    required: true
+runs:
+  using: "node20"
+  main: "index.js"
+ 
+  
