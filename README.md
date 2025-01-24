@@ -37,7 +37,7 @@ jobs:
             uses: miyasuta/ctms-upload-action@main
             with:
                 mta: ./mta.tar
-                credentials: ${{ secrets.CREDENTIALS }}
+                credentials: ${{ secrets.CTMS_CREDENTIALS }}
                 nodeName: <Node Name>
                 transportDescription: <Description>                
                 namedUser: <Upload User Name>
