@@ -13,7 +13,7 @@ jobs:
         uses: ./
         with:
           mta: './test.mtar'
-          credentials: ${{ secrets.CREDENTIALS }}
+          credentials: ${{ secrets.CTMS_CREDENTIALS }}
           namedUser: GitHubAcions
           nodeName: DEV
           transportDescription: 'test'
