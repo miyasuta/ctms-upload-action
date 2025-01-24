@@ -4,6 +4,8 @@ const FormData = require('form-data');
 
 (async () => {
   try {
+    core.info('Test message: The script has started');
+    
     //get inputs
     const mta = core.getInput('mta');
     const credentials = core.getInput('credentials');

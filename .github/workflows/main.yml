@@ -1,8 +1,5 @@
 name: Test Action
-on:
-  workflow_dispatch:
-    branches:
-      - main
+on: workflow_dispatch
 
 jobs:
   test-action:
