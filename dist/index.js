@@ -34673,86 +34673,111 @@ module.exports = /*#__PURE__*/JSON.parse('{"application/1d-interleaved-parityfec
 /************************************************************************/
 var __webpack_exports__ = {};
 const core = __nccwpck_require__(1334);
+const fs = __nccwpck_require__(9896);
 const axios = __nccwpck_require__(2543);
 const index_FormData = __nccwpck_require__(956);
 
-// (async () => {
-  try {
-    console.log('Index.js has started');
-    core.info('Test message: The script has started');
-    
+async function main() {
+  try {   
     //get inputs
-    const mta = core.getInput('mta');
+    const mtaPath = core.getInput('mta');
+    //get file name from path
+    const mtaFileName = mtaPath.split('/').pop();
     const credentials = core.getInput('credentials');
     const namedUser = core.getInput('namedUser');
     const nodeName = core.getInput('nodeName');
     const transportDescription = core.getInput('transportDescription');
 
-    // //parse credentials
-    // const parsedCredentials = JSON.parse(credentials);
-    // const clientid = parsedCredentials.uaa.clientid;
-    // const clientsecret = parsedCredentials.uaa.clientsecret;
-    // const url = `${parsedCredentials.uaa.url}/oauth/token`;
-    // const apiUrl = `${parsedCredentials.uri}/v2`;
+    //check if file exists
+    if (!fs.existsSync(mtaPath)) {
+      throw new Error(`MTA file does not exist: ${mtaPath}`);
+    }
+    core.info(`MTA file exists: ${mtaPath}`);
 
-    // //get token
-    // const authResponse = await axios.post(url, {}, {
-    //   headers: {
-    //     'Content-Type': 'application/x-www-form-urlencoded'      
-    //  },
-    //   auth: {
-    //     username: clientid,
-    //     password: clientsecret
-    //   },
-    //   params: {
-    //     grant_type: 'client_credentials'
-    //   }
-    // });
-    // const token = authResponse.data.access_token;
-    // core.info(`Token fetched successfully`);
+    //read file
+    const mtaContent = fs.readFileSync(mtaPath);
+    core.info(`MTA content type: ${typeof mtaContent}`);
+    core.info(`MTA file size: ${mtaContent.length} bytes`);    
 
-    // //upload mta
-    // const form = new FormData();
-    // form.append('file', mta);
-    // if (namedUser) {
-    //   form.append('namedUser', namedUser);
-    // }
+    //parse credentials
+    const parsedCredentials = JSON.parse(credentials);
+    const clientid = parsedCredentials.uaa.clientid;
+    const clientsecret = parsedCredentials.uaa.clientsecret;
+    const url = `${parsedCredentials.uaa.url}/oauth/token`;
+    const apiUrl = `${parsedCredentials.uri}/v2`;
 
-    // const uploadResponse = await axios.post(`${apiUrl}/files/upload`, form, {
-    //     headers: {
-    //         'Authorization': `Bearer ${token}`,
-    //         ...form.getHeaders()
-    //     },
-    // });
-    // const fileId = uploadResponse.data.fileId;
-    // core.info(`MTA file uploaded successfully`);
+    //output parsed credentials
+    core.info(`API URL: ${apiUrl}`);
 
-    // //upload to transport node
-    // const nodeData = {
-    //     description: transportDescription,
-    //     entries: [{ uri: fileId }],
-    //     nodeName: nodeName,
-    //     contentType: 'MTA',
-    //     storageType: 'FILE'
-    // }
-    // if (namedUser) {
-    //   nodeData.namedUser = namedUser;
-    // }
+    //get token
+    const authResponse = await axios.post(url, {}, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'      
+     },
+      auth: {
+        username: clientid,
+        password: clientsecret
+      },
+      params: {
+        grant_type: 'client_credentials'
+      }
+    });
+    const token = authResponse.data.access_token;
+    core.info(`Token fetched successfully`);
 
-    // const transportResponse = await axios.post(`${apiUrl}/nodes/upload`, nodeData, {
-    //     headers: {
-    //         'Authorization': `Bearer ${token}`,
-    //         'Content-Type': 'application/json',
-    //     },
-    // });
-    // const requestId = transportResponse.data.transportRequestId;
-    // core.info(`Transport Request ${requestId} created successfully`);
+    //upload mta
+    const form = new index_FormData();
+    form.append('file', mtaContent, mtaFileName);
+    if (namedUser) {
+      form.append('namedUser', namedUser);
+    }
+
+    const uploadResponse = await axios.post(`${apiUrl}/files/upload`, form, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            ...form.getHeaders()
+        },
+    });
+    const fileId = uploadResponse.data.fileId;
+    core.info(`MTA file uploaded successfully`);
+
+    //upload to transport node
+    const nodeData = {
+        description: transportDescription,
+        entries: [{ uri: fileId }],
+        nodeName: nodeName,
+        contentType: 'MTA',
+        storageType: 'FILE'
+    }
+    if (namedUser) {
+      nodeData.namedUser = namedUser;
+    }
+
+    const transportResponse = await axios.post(`${apiUrl}/nodes/upload`, nodeData, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    const requestId = transportResponse.data.transportRequestId;
+    core.info(`Transport Request ${requestId} created successfully`);
 
   } catch (error) {
     console.error(`Error: ${error.message}`);
     core.setFailed(`Error occurred: ${error.message}`);
+    if (error.response) {
+      core.error(`Response status: ${error.response.status}`);
+      core.error(`Response data: ${JSON.stringify(error.response.data, null, 2)}`);
+      core.error(`Response headers: ${JSON.stringify(error.response.headers, null, 2)}`);
+    } else if (error.request) {
+      core.error(`No response received: ${error.request}`);
+    }
+    core.error(`Request headers: ${JSON.stringify(error.config.headers, null, 2)}`);    
   }
-// });
+}
+
+main();
 module.exports = __webpack_exports__;
 /******/ })()
 ;
