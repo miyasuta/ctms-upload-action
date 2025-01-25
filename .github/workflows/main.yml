@@ -11,6 +11,6 @@ jobs:
         with:
           mta: './test.mtar'
           credentials: ${{ secrets.CTMS_CREDENTIALS }}
-          namedUser: GitHubAcions
+          namedUser: GitHubActions
           nodeName: DEV
           transportDescription: 'test'

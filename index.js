@@ -4,6 +4,7 @@ const FormData = require('form-data');
 
 (async () => {
   try {
+    console.log('Index.js has started');
     core.info('Test message: The script has started');
     
     //get inputs
@@ -74,6 +75,7 @@ const FormData = require('form-data');
     core.info(`Transport Request ${requestId} created successfully`);
 
   } catch (error) {
+    console.error(`Error: ${error.message}`);
     core.setFailed(`Error occurred: ${error.message}`);
   }
 });
