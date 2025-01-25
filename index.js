@@ -22,7 +22,6 @@ async function main() {
 
     //read file
     const mtaContent = fs.readFileSync(mtaPath);
-    core.info(`MTA content type: ${typeof mtaContent}`);
     core.info(`MTA file size: ${mtaContent.length} bytes`);    
 
     //parse credentials
