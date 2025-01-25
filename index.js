@@ -1,17 +1,31 @@
 const core = require('@actions/core');
+const fs = require('fs');
 const axios = require('axios');
 const FormData = require('form-data');
 
-(async () => {
+async function main() {
   try {
     core.info('Test message: The script has started');
     
     //get inputs
-    const mta = core.getInput('mta');
+    const mtaPath = core.getInput('mta');
+    //get file name from path
+    const mtaFileName = mtaPath.split('/').pop();
     const credentials = core.getInput('credentials');
     const namedUser = core.getInput('namedUser');
     const nodeName = core.getInput('nodeName');
     const transportDescription = core.getInput('transportDescription');
+
+    //check if file exists
+    if (!fs.existsSync(mtaPath)) {
+      throw new Error(`MTA file does not exist: ${mtaPath}`);
+    }
+    core.info(`MTA file exists: ${mtaPath}`);
+
+    //read file
+    const mtaContent = fs.readFileSync(mtaPath);
+    core.info(`MTA content type: ${typeof mtaContent}`);
+    core.info(`MTA file size: ${mtaContent.length} bytes`);    
 
     //parse credentials
     const parsedCredentials = JSON.parse(credentials);
@@ -19,6 +33,9 @@ const FormData = require('form-data');
     const clientsecret = parsedCredentials.uaa.clientsecret;
     const url = `${parsedCredentials.uaa.url}/oauth/token`;
     const apiUrl = `${parsedCredentials.uri}/v2`;
+
+    //output parsed credentials
+    core.info(`API URL: ${apiUrl}`);
 
     //get token
     const authResponse = await axios.post(url, {}, {
@@ -38,7 +55,7 @@ const FormData = require('form-data');
 
     //upload mta
     const form = new FormData();
-    form.append('file', mta);
+    form.append('file', mtaContent, mtaFileName);
     if (namedUser) {
       form.append('namedUser', namedUser);
     }
@@ -46,6 +63,7 @@ const FormData = require('form-data');
     const uploadResponse = await axios.post(`${apiUrl}/files/upload`, form, {
         headers: {
             'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
             ...form.getHeaders()
         },
     });
@@ -75,5 +93,15 @@ const FormData = require('form-data');
 
   } catch (error) {
     core.setFailed(`Error occurred: ${error.message}`);
+    if (error.response) {
+      core.error(`Response status: ${error.response.status}`);
+      core.error(`Response data: ${JSON.stringify(error.response.data, null, 2)}`);
+      core.error(`Response headers: ${JSON.stringify(error.response.headers, null, 2)}`);
+    } else if (error.request) {
+      core.error(`No response received: ${error.request}`);
+    }
+    core.error(`Request headers: ${JSON.stringify(error.config.headers, null, 2)}`);    
   }
-});
+}
+
+main();
