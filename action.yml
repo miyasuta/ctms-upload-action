@@ -1,5 +1,11 @@
 name: CTMS Upload Action
 description: Upload MTA to Cloud Transport Managment
+author: Mio Yasutake
+
+branding:
+  icon: upload-cloud
+  color: blue
+
 inputs:
   mta:
     description: 'Path to the MTA file'
