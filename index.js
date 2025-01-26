@@ -104,7 +104,7 @@ async function main() {
         }
       });
       const actionId = importResponse.data.actionId;
-      core.info(`Transport Request ${requestId} imported successfully`);
+      core.info(`The import of ${requestId} has started. You can check the status at "/v2/actions/${actionId}". See https://api.sap.com/api/TMS_v2/path/TRANSPORT_ACTION_GET_V2 for details.`);
       core.setOutput('actionId', actionId);
     }
 

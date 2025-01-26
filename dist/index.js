@@ -34778,7 +34778,7 @@ async function main() {
         }
       });
       const actionId = importResponse.data.actionId;
-      core.info(`Transport Request ${requestId} imported successfully`);
+      core.info(`The import of ${requestId} has started. You can check the status at "/actions/${actionId}"`);
       core.setOutput('actionId', actionId);
     }
 
