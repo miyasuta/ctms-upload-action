@@ -1,52 +1,49 @@
 # CTMS Upload Action
 
-This GitHub Action uploads files to the CTMS (Cloud Transport Management Service).
+This GitHub Action uploads files to the Cloud Transport Management Service (CTMS) on SAP BTP. Optionally, it imports the created transport request to a specified target node.
+
+## Features
+- Upload MTA archives to CTMS.
+- Automatically create transport requests.
+- Optionally import transport requests to a specified target node.
 
 ## Usage
 
 To use this action, create a workflow file in your repository (e.g., `.github/workflows/upload.yml`) with the following content:
 
 ```yaml
-name: Upload to CTMS
-
-on:
-    push:
-        branches:
-            - main
-
 jobs:
-    build:
-        # checkout and build MTA archive
-        ...
-      - name: Upload MTA Archive
-        uses: actions/upload-artifact@v4
+  test-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Upload MTA to CTMS
+        uses: miyasuta/ctms-upload-action@main
         with:
-          name: mta
-          path: ./gen/mta.tar
-
-    upload:
-        runs-on: ubuntu-latest
-        steps:
-        - name: Download MTA Archive
-            uses: actions/download-artifact@v4
-            with:
-            name: mta
-            path: ./
-
-        - name: Upload files to CTMS
-            uses: miyasuta/ctms-upload-action@main
-            with:
-                mta: ./mta.tar
-                credentials: ${{ secrets.CTMS_CREDENTIALS }}
-                nodeName: <Node Name>
-                transportDescription: <Description>                
-                namedUser: <Upload User Name>
+          mta: <Path to MTA Archive>
+          credentials: ${{ secrets.CTMS_CREDENTIALS }}
+          nodeName: <Node Name>
+          transportDescription: <Description>   
+          namedUser: <Upload User Name>
+          importTransportRequest: false
 ```
 
 ## Inputs
+- `mta`: The file path to the MTA archive.
+- `credentials`: The service key of Cloud Transport Management service instance.
+- `nodeName`: The name of the target node where the MTA archive will be uploaded.
+- `transportDescription`: A description for the transport request.
+- `namedUser` (optional): The user name to display in the CTMS UI. If not provided, the authentication user will be shown.
+- `importTransportRequest` (optional): If `true`, the transport request will be imported to the specified node.
 
-- `mta`: The location of mta archive
-- `credentials`: The service key of Cloud Transport Management service instance
-- `nodeName`: The target node name to upload the mta archive
-- `transportDescription`: The name of the transport request
-- `namedUser` (optional): User displayed in Cloud Transport Management UI. If not given, the authentication user will be shown in Cloud Transport Management UI.
+## Outputs
+- `transportId`: 	The ID of the created transport request.
+- `actionId`: The ID of the action generated during the import process. Use this to track the import status.
+
+## Notes
+- Ensure that the `CTMS_CREDENTIALS` secret is properly configured in your repository settings.
+- The MTA archive should be built and ready before running this action.
+- Sample workflows can be found in the following repository:
+[github-action-ctms](https://github.com/miyasuta/github-action-ctms/blob/main/.github/workflows/deploy.yml)
