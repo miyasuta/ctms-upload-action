@@ -16,6 +16,16 @@ inputs:
   transportDescription:
     description: 'Description for the transport'
     required: true
+  importTransportRequest:
+    description: 'Import transport requests'
+    required: false
+    default: false
+
+outputs:
+  transportId:
+    description: 'Transport ID'
+  actionId:
+    description: 'Transport Action ID'
 runs:
   using: 'node20'
   main: 'dist/index.js'
